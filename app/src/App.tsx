@@ -1,5 +1,6 @@
+import { getVersion } from "@tauri-apps/api/app";
 import { invoke, isTauri } from "@tauri-apps/api/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Panel = { id: number; title: string; content: string };
 type WorkspaceSnapshot = { panels: Panel[]; activePanelId: number };
@@ -7,6 +8,7 @@ type WorkspaceDocument = WorkspaceSnapshot & { schemaVersion: number };
 type NativeWorkspaceLoad = { workspace: WorkspaceDocument | null; path: string };
 
 const STORAGE_KEY = "dva.workspace.v1";
+const DEVELOPMENT_VERSION = "0.2.0";
 const starterPanel: Panel = { id: 1, title: "Untitled", content: "" };
 const starterWorkspace = (): WorkspaceSnapshot => ({
   panels: [{ ...starterPanel }],
@@ -47,6 +49,9 @@ export default function App() {
   const [panels, setPanels] = useState<Panel[]>([]);
   const [activePanelId, setActivePanelId] = useState(0);
   const [saveStatus, setSaveStatus] = useState("Loading workspace…");
+  const [saveError, setSaveError] = useState("");
+  const [appVersion, setAppVersion] = useState(`${DEVELOPMENT_VERSION} · preview`);
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const [workspacePath, setWorkspacePath] = useState("");
   const [ready, setReady] = useState(false);
   const [recoveryMessage, setRecoveryMessage] = useState("");
@@ -55,6 +60,18 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const activePanel = panels.find((panel) => panel.id === activePanelId);
   const recoveryRequired = recoveryMessage.length > 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    if (isTauri()) {
+      void getVersion().then((version) => {
+        if (!cancelled) setAppVersion(version);
+      }).catch(() => {
+        if (!cancelled) setAppVersion(DEVELOPMENT_VERSION + " · version unavailable");
+      });
+    }
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -148,7 +165,10 @@ export default function App() {
   async function saveWorkspace() {
     if (!ready || recoveryRequired) return;
     const snapshot: WorkspaceSnapshot = { panels, activePanelId };
-    try {
+    setSaveError("");
+    setSaveStatus("Saving…");
+
+    const performSave = async () => {
       if (isTauri()) {
         const path = await invoke<string>("save_workspace", {
           workspace: { schemaVersion: 1, ...snapshot },
@@ -159,8 +179,18 @@ export default function App() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
         setSaveStatus("Saved locally");
       }
+    };
+
+    // Native saves share one temporary file. Serialize calls so autosave and Ctrl/Cmd+S
+    // cannot overwrite each other's temporary write.
+    const queuedSave = saveQueue.current.catch(() => undefined).then(performSave);
+    saveQueue.current = queuedSave;
+    try {
+      await queuedSave;
     } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
       setSaveStatus("Save failed");
+      setSaveError(detail);
       console.error("DVA workspace save failed:", error);
     }
   }
@@ -229,7 +259,7 @@ export default function App() {
     <main className="dva-shell">
       <header className="topbar">
         <div className="brand" aria-label="DVA workspace">
-          <span className="brand-mark">D</span><span>DVA</span><span className="workspace-label">WORKSPACE</span>
+          <span className="brand-mark">D</span><span>DVA</span><span className="workspace-label">WORKSPACE</span><span className="workspace-version" aria-label={"App version " + appVersion}>v{appVersion}</span>
         </div>
         <div className="topbar-actions">
           <span className={saveStatus === "Save failed" || recoveryRequired ? "status-dot status-error" : "status-dot"} aria-hidden="true" />
@@ -281,7 +311,7 @@ export default function App() {
         <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>N</kbd> New panel</span>
         <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>F</kbd> Find anything</span>
         <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>S</kbd> Save</span>
-        <span className="hint-note">{recoveryRequired ? "Autosave paused to protect saved data." : saveStatus === "Save failed" ? "Could not save. Your current writing remains open; check the workspace path." : workspacePath || "A workspace that follows the work."}</span>
+        <span className="hint-note">{recoveryRequired ? "Autosave paused to protect saved data." : saveStatus === "Save failed" ? "Could not save: " + (saveError || "unknown error") : workspacePath || "A workspace that follows the work."}</span>
       </footer>
 
       {searchOpen && ready && !recoveryRequired && (
