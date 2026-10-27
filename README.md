@@ -5,7 +5,7 @@ DVA is a panel-first, modular desktop workspace. This repository contains its cu
 ## Canonical documents
 
 - [DVA Initial Design](DVAInitialDesignDoc.md) — the single current design document. Its current SemVer is recorded inside the file.
-- [DVA Test Record](DVA-Test-Record-v0.1.0.md) — current verification record; update in place when its status changes, keeping one current record in this folder.
+- [DVA Test Record](DVA-Test-Record.md) — current verification record; update in place when its status changes, keeping one current record in this folder.
 
 ## Document maintenance rule
 
