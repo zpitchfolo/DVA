@@ -26,7 +26,7 @@ jobs:
         run: npm ci
       - name: Generate patched Vitest lockfile for review
         run: |
-          npm install --package-lock-only vitest@4.1.12
+          npm update --package-lock-only vitest
           git diff -- package-lock.json
           npm ci
       - name: Report dependency audit details
