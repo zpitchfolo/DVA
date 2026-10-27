@@ -352,13 +352,14 @@ A item is the content or view a tab points to.
 
 A user can create an entire project from embedded content without ever turning pieces into separate files.
 
-### File
+### File-backed item
 
-- Text stored on disk.
-- Referenced by workspace JSON.
+- Text content stored in a standalone file on disk and referenced by workspace JSON.
 - Can be opened in multiple tabs.
 - Can be versioned with Git if the user chooses to use Git.
-- Can be created by promoting an embedded item.
+- Can be created by promoting embedded writing into a standalone text file.
+
+Other external file types, including images and PDFs, can also be opened as supported items or views. Their viewing and annotation behavior follows the external-document rules in §11; support for each type depends on the relevant implementation.
 
 ### View
 
