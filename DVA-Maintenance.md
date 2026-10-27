@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.1.1  
+**Document version:** 0.1.2  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -8,18 +8,19 @@
 
 This file is the project's continuity anchor. A new chat or contributor should be able to resume work without guessing what was decided, rebuilding the plan from memory, or mistaking an intended feature for a working one.
 
-Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitchfolo/Meta-Modules/blob/main/workflows/Development-State-Machine-Workflow-v1.5.0.md) and discover applicable modules from [Meta-Modules](https://github.com/zpitchfolo/Meta-Modules). For software work, use [Testing and Verification v0.1.0](https://github.com/zpitchfolo/Meta-Modules/blob/main/modules/testing-and-verification-v0.1.0.md) where applicable.
+Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitchfolo/Meta-Modules/blob/main/workflows/Development-State-Machine-Workflow-v1.5.0.md) and discover applicable modules from [Meta-Modules](https://github.com/zpitchfolo/Meta-Modules). For software implementation, apply [Testing and Verification v0.1.0](https://github.com/zpitchfolo/Meta-Modules/blob/main/modules/testing-and-verification-v0.1.0.md) where applicable.
 
 ## Current project state
 
 - DVA is a Tauri 2 + React + TypeScript + Vite desktop prototype.
-- The current UI has editable panels, panel creation/closing, panel search, a Save button, autosave, and keyboard shortcuts.
-- The current persistence code in `app/src/App.tsx` uses WebView `localStorage` with key `dva.workspace.v1`.
-- The user reports that writing persists after closing and reopening the app. Record this as user-reported evidence, not as an independently reproduced test result.
-- The app currently uses Ctrl/Cmd+P to open panel search. This conflicts with the agreed target of Ctrl/Cmd+F.
-- Ctrl/Cmd+S exists in code, but the user reports that it appears to do nothing. The next implementation should make the save action observable and ensure pending writes are flushed.
-- The app does not yet use the intended canonical workspace JSON file. Do not imply that native JSON persistence, migration, or workspace path selection already works.
-- Latest CI: [GitHub Actions run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029) passed `npm ci`, all 8 frontend tests, and `npm run build` on Ubuntu 24.04 / Node 22.23.3. This does not verify the Tauri desktop runtime, real close/reopen persistence, or native JSON persistence. See the [test record](DVA-Test-Record.md) for exact evidence.
+- The current UI supports editable panels, panel creation/closing, panel search, a Save action, autosave, and keyboard shortcuts.
+- Search is Ctrl/Cmd+F, New Panel is Ctrl/Cmd+N, and Save is Ctrl/Cmd+S.
+- Current persistence uses WebView `localStorage` with key `dva.workspace.v1`. This is temporary implementation storage, not the agreed canonical workspace JSON file.
+- The user reports that writing survives closing and reopening the app. Keep this labeled as user-reported until the desktop restart flow is independently tested.
+- Native JSON persistence, schema validation, user-selectable workspace location, localStorage-to-JSON migration, and recovery from malformed or interrupted writes are not implemented yet.
+- Dependency update: Vitest and the `@vitest/*` family are at 4.1.12.
+- Verified CI: [GitHub Actions run #20](https://github.com/zpitchfolo/DVA/actions/runs/40445241936) passed on the documentation-update commit `7237356dbb809efeba28cfcd72687e051a8062ca`. The preceding tested dependency candidate, commit `18840cc589d560c2e03edf30e44d82db0833b95c`, passed `npm ci`, `npm audit` (0 vulnerabilities), `npm test` (8 tests), and `npm run build` in [run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309). These are hosted frontend checks, not a Windows desktop-runtime or native-persistence test.
+- See [DVA-Test-Record.md](DVA-Test-Record.md) for the detailed evidence. Keep older conflicting text corrected in that file rather than treating it as current.
 
 ## Decisions that must not be re-litigated without new evidence
 
@@ -27,80 +28,100 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 
 1. Workspace JSON is the canonical home for working content and workspace state, not merely a settings file or backup.
 2. Default location: DVA's dedicated, writable app-data directory for ordinary installed builds.
-3. Portable distribution may configure a dedicated `app-data` folder next to the executable, but only where that location is writable. Never assume an installed app can write to its installation directory.
+3. A portable distribution may configure a dedicated `app-data` folder beside the executable, but only where writable. Never assume an installed app can write to its installation directory.
 4. Users must be able to choose a different workspace location. The default should work without requiring the user to make that choice.
 5. Existing localStorage content must be preserved during migration. Do not clear or overwrite the old source until the new JSON has been written and read back/validated successfully.
-6. Use narrowly scoped native filesystem access and validate the JSON schema. Treat invalid or old JSON as a recovery/migration case, not as permission to silently replace it with an empty workspace.
+6. Validate the JSON schema. Treat invalid or older JSON as a recovery/migration case, not as permission to silently replace it with an empty workspace.
+7. Use narrowly scoped native filesystem access; do not grant the frontend unrestricted filesystem access.
 
-Reference: [Tauri configuration and app directory overrides](https://v2.tauri.app/reference/config/) and [Tauri filesystem plugin](https://v2.tauri.app/plugin/file-system/).
+Reference: [Tauri configuration](https://v2.tauri.app/reference/config/) and [Tauri filesystem plugin](https://v2.tauri.app/plugin/file-system/).
 
 ### Keyboard shortcuts and save feedback
 
 - Ctrl/Cmd+F: Find/search.
 - Ctrl/Cmd+S: Save/flush pending writes and display a clear success or failure state.
 - Ctrl/Cmd+N: New panel.
-- Ctrl/Cmd+P is the current prototype behavior only and must be replaced by Ctrl/Cmd+F.
-- Search currently covers panel titles and content. Do not silently claim that it searches files or the entire workspace.
+- Search currently covers panel titles and content. Do not claim it searches files or the entire workspace.
+- Keep shortcut labels, implementation, tests, and documentation aligned.
 
 ## Current files
 
 - `DVAInitialDesignDoc.md`: canonical design and architecture decisions.
-- `DVA-Test-Record.md`: one current record of actual verification results.
+- `DVA-Test-Record.md`: current verification evidence.
 - `DVA-Maintenance.md`: this continuity, maintenance, and recovery guide.
 - `app/src/App.tsx`: current prototype implementation.
 - `app/src/App.test.tsx`: frontend regression tests.
-- `app/package.json`: available scripts.
-- `.github/workflows/ci.yml`: CI workflow for dependency installation, tests, and production build.
+- `app/package.json` and `app/package-lock.json`: dependencies and lockfile.
+- `.github/workflows/ci.yml`: CI workflow for dependency installation, audit details, tests, and production build.
 
-Keep one current copy of each document. Update in place, bump the document's own SemVer, inspect the diff, and use Git history as the archive. Do not create version-suffixed duplicates.
+Keep one current copy of each document. Update in place, bump that document's own SemVer, inspect the diff, and use Git history as the archive. Do not create version-suffixed duplicates.
 
 ## Next implementation sequence
 
-Work in small, verifiable slices. Preserve the existing writing throughout.
+The next milestone is **canonical JSON persistence with safe migration**, not adding more surface features. Work in small, verifiable slices.
 
 ### 1. Establish the baseline
 
 - Inspect the current branch, working tree, latest commit, relevant source, tests, and CI workflow.
-- Read the latest design document and test record.
-- Run `npm ci`, `npm test`, and `npm run build` from `app/` when the environment permits.
-- Record exact commands, commit/candidate identity, exit codes, and output. If a command cannot run, mark it **NOT RUN** and state why.
+- Read the latest design document, this guide, and the test record.
+- Run `npm ci`, `npm audit`, `npm test`, and `npm run build` from `app/` when the environment permits.
+- Record exact commands, candidate commit, exit codes, and output. If a command cannot run, mark it **NOT RUN** and explain why.
+- Keep the current user data and last known good commit recoverable before implementation.
 
-### 2. Correct Find and Save behavior
+### 2. Specify the smallest safe persistence slice
 
-- Change Ctrl/Cmd+P to Ctrl/Cmd+F.
-- Update the footer hint and tests to match.
-- Ensure Ctrl/Cmd+S and the Save button visibly acknowledge the action and report failures.
-- Keep keyboard handlers accessible and avoid triggering shortcuts while a browser/OS-reserved context or unintended modifier combination is active.
-- Run regression tests and the production build; verify shortcuts in the Tauri desktop runtime where possible.
+Before coding, define observable acceptance checks and settle only the schema details needed for the first migration:
+- A versioned workspace JSON document contains panel content and the active-panel/workspace state currently persisted by the prototype.
+- DVA uses an app-specific writable data directory by default.
+- The application can report the actual workspace path.
+- Missing data, invalid JSON, unsupported schema versions, and write failures produce explicit recoverable outcomes.
+- Existing `dva.workspace.v1` localStorage data remains untouched until the JSON copy is successfully written and read back/validated.
+- No broad filesystem permissions or silent fallback to an empty workspace.
 
-### 3. Implement canonical JSON persistence
+Do not prematurely implement every future workspace concept in the design document. Preserve a clear path to extend the schema.
 
-- Define and validate a versioned workspace JSON schema.
-- Use a narrow Tauri/Rust persistence command or a suitable, permission-scoped Tauri API.
-- Default to the app-specific writable data directory for installed builds.
-- Add a user-selectable path workflow without making path selection mandatory for first use.
-- Use safe writes: write to a temporary file, flush as supported, validate the serialized result, then replace the previous file with an appropriate backup/recovery strategy.
-- Migrate `dva.workspace.v1` localStorage data only after validating the source and preserve the source until the new JSON has been verified.
-- Handle missing files, malformed JSON, older schema versions, write failures, and interrupted migration without silently losing writing.
-- Make the current workspace path discoverable in the UI or workspace information view.
-- Avoid adding broad filesystem permissions. Keep access constrained to the intended workspace and app-data paths.
+### 3. Implement native JSON persistence and migration
 
-### 4. Verify migration and restart behavior
+- Choose a narrowly scoped Tauri/Rust command or permission-scoped Tauri API appropriate to the current Tauri configuration.
+- Add schema validation and a clear schema version.
+- Implement safe writes using a temporary file and validated replacement/backup strategy.
+- Migrate localStorage content without discarding the source before verification.
+- Handle first launch, repeat launch, malformed source, malformed target, unsupported versions, write/permission errors, and retry after interruption.
+- Make the current workspace path and save status discoverable in the UI.
+- Keep migration idempotent: retrying after a partial failure must not duplicate or erase content.
 
-- With existing localStorage writing present, launch the app and migrate.
-- Confirm the JSON exists at the reported path and contains the expected panel content and active-panel state.
-- Close and reopen the desktop app; verify the same content and arrangement return from JSON.
-- Test malformed JSON, missing JSON, permission/write failure, and migration retry behavior without deleting the recoverable source.
-- Verify Ctrl/Cmd+F, Ctrl/Cmd+S, Ctrl/Cmd+N, Save status, and panel search.
-- Run the relevant automated tests and production build again after repairs.
+### 4. Test persistence and recovery
 
-### 5. Record and accept
+Automated checks should cover at least:
+- Serialization/deserialization round-trip of panels and active-panel state.
+- Schema validation and unsupported versions.
+- Migration from valid localStorage data.
+- Preservation of source data on write/validation failure.
+- Missing, malformed, and partially written JSON recovery behavior.
+- Repeat migration/startup without data loss or duplication.
+- Save status and relevant keyboard behavior.
 
-- Inspect the full diff for accidental changes, data-loss risks, permission expansion, and stale shortcut labels.
-- Update the design document to distinguish decisions from implemented behavior.
-- Update the test record only with checks actually run; retain user-reported results as such.
-- Accept only when required automated and runtime gates pass. If a gate fails or cannot be checked, leave the candidate unaccepted and record the blocker.
-- Commit with a descriptive message after reviewing the diff. If a candidate breaks the app or risks user data, stop feature work and recover using the last known good commit/diff.
+Then run `npm ci`, `npm audit`, `npm test`, and `npm run build`. Add native Rust/Tauri tests where the chosen implementation allows them.
+
+### 5. Verify the actual desktop flow
+
+In a real Tauri desktop run, verify:
+- Existing localStorage writing migrates to the expected JSON path.
+- The resulting JSON contains the expected panel content and state.
+- Closing and reopening restores the workspace from JSON.
+- Ctrl/Cmd+F, Ctrl/Cmd+S, Ctrl/Cmd+N, the Save button, and search behave correctly.
+- Malformed JSON and write failures preserve recoverable content and provide understandable feedback.
+- The app can start and continue writing without requiring the user to manually choose a path on first launch.
+
+CI passing alone does not satisfy this gate. If the Windows desktop runtime cannot be tested, record that limitation and do not claim desktop acceptance.
+
+### 6. Review, record, and accept
+
+- Inspect the full diff for accidental changes, data-loss risks, permission expansion, and stale labels.
+- Update the design document only where implementation reveals a confirmed decision or changes the implementation boundary.
+- Update the test record with checks actually run; keep user-reported observations separate from independently verified results.
+- Accept only when the required automated and runtime gates pass. If a required gate fails or cannot be checked, leave acceptance pending and record the blocker.
+- Commit with a descriptive message after reviewing the diff. If a candidate breaks the app or risks user data, stop feature work and recover from the last known good commit/diff.
 
 ## Commands
 
@@ -108,6 +129,7 @@ Run from the repository's `app/` directory:
 
 ```sh
 npm ci
+npm audit
 npm test
 npm run build
 npm run tauri dev
@@ -120,7 +142,7 @@ On Windows PowerShell, first enter the local clone's `app` directory. Do not ass
 Stop and investigate instead of continuing feature work if:
 
 - Any existing writing disappears, is overwritten, or cannot be recovered.
-- JSON migration cannot prove the new copy is valid before retiring the old source.
+- Migration cannot prove the new copy is valid before retiring the old source.
 - A required test fails.
 - A required check cannot run and the missing evidence affects data safety or core behavior.
 - A change broadens filesystem permissions beyond the intended paths.
@@ -147,4 +169,4 @@ At the end of a work session, leave a short handoff containing:
 - Remaining blockers and next smallest action.
 - Any data-safety or migration concerns.
 
-The next session should start by reading this guide, the design document, the test record, and the current diff/status. Do not restart the planning process from scratch unless the repository evidence contradicts these records.
+The next session should start by reading this guide, the design document, the test record, and the current diff/status. Do not restart the planning process from scratch unless repository evidence contradicts these records.
