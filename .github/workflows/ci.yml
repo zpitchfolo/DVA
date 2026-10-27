@@ -24,6 +24,10 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Report dependency audit details
+        run: |
+          npm audit --json > npm-audit-report.json || true
+          node -e 'const report = require("./npm-audit-report.json"); const vulnerabilities = report.vulnerabilities ?? {}; const entries = Object.entries(vulnerabilities); console.log(`Audited packages with findings: ${entries.length}`); for (const [name, item] of entries) console.log(JSON.stringify({ name, severity: item.severity, direct: item.isDirect, range: item.range, fixAvailable: item.fixAvailable }));'
       - name: Run tests
         run: npm test
       - name: Type-check and build
