@@ -1,9 +1,26 @@
 # DVA: Design Document
 
-**Version:** 0.6.8  
+**Version:** 0.6.9  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.6.7  
+**Previous version:** 0.6.8  
 **Motto:** Evidence over speculation.
+
+## Version 0.6.9: Change Summary
+
+This patch establishes the first persistence and keyboard-shortcut slice in the running prototype. The frontend now autosaves panel content and active-panel state to local storage, offers an explicit Save action and Ctrl/Cmd+S, creates panels with Ctrl/Cmd+N, and opens panel search with Ctrl/Cmd+P. These are implementation changes, not yet verified by an executed test run or restart acceptance check.
+
+### Added in this version
+
+- Autosave the current panel collection and active panel to versioned local-storage key `dva.workspace.v1`.
+- Restore saved panels on startup and tolerate missing, malformed, or incompatible saved data by starting with a starter panel.
+- Show a visible local-save status and expose an explicit Save button.
+- Implement Ctrl/Cmd+S, Ctrl/Cmd+N, and Ctrl/Cmd+P; panel search filters panel titles and content and opens a selected result.
+- Add regression tests for persistence, keyboard shortcuts, and panel search. The tests must be executed before the candidate is accepted.
+- Add automated CI checks for dependency installation, tests, and production build.
+
+### Current implementation boundary
+
+This is a prototype persistence layer, not yet the intended canonical workspace JSON file. Browser/WebView local storage is convenient for immediate persistence, but it is origin-specific and does not yet provide user-chosen workspace files, export/import, history snapshots, migration tooling, or recovery from storage-device failure. Those remain separate work. See the current test record for actual execution evidence.
 
 ## Version 0.6.7: Change Summary
 
