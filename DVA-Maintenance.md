@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.4.0  
+**Document version:** 0.5.0  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -18,7 +18,7 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 - Desktop source now uses a versioned native `workspace.json` through two narrow Rust commands, with a temporary file, read-back validation, and a `.bak` copy before replacing an existing file. This source has not yet passed the new native CI job or desktop-runtime acceptance.
 - Browser preview retains `dva.workspace.v1` localStorage. When native JSON is absent, valid browser data is copied into JSON and verified; the original localStorage value is intentionally retained.
 - Invalid browser data or native JSON blocks initialization/autosave and shows a recovery state rather than silently replacing the data with a starter workspace.
-- The current design document is `DVAInitialDesignDoc.md` v0.11.0. User-selected workspace locations remain unimplemented.
+- The current design document is `DVAInitialDesignDoc.md` v0.12.0. User-selected workspace locations remain unimplemented.
 - The user reports that writing survives closing and reopening the app. Keep this labeled as user-reported until the new JSON-backed desktop restart flow is independently tested.
 - Dependency update: Vitest and the `@vitest/*` family are at 4.1.12.
 - Verified CI: [GitHub Actions run #20](https://github.com/zpitchfolo/DVA/actions/runs/40445241936) passed on the documentation-update commit `7237356dbb809efeba28cfcd72687e051a8062ca`. The preceding tested dependency candidate, commit `18840cc589d560c2e03edf30e44d82db0833b95c`, passed `npm ci`, `npm audit` (0 vulnerabilities), `npm test` (8 tests), and `npm run build` in [run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309). These are hosted frontend checks, not a Windows desktop-runtime or native-persistence test.
@@ -71,7 +71,7 @@ Keep one current copy of each document. Update in place, bump that document's ow
 
 ## Recent design decisions not yet implemented
 
-The latest design update adds citation-aware reading and writing as a refinement of the existing mark, annotation, metadata, and export model. A citation remains semantically attached to relevant text while Reading View may present it as a contextual annotation, Writing or Review View may show it inline, and conventional-paper export may generate inline citations and a bibliography in the selected style. This is recorded in DVAInitialDesignDoc.md v0.11.0 alongside the prior HTML-publication and portable-metadata design decisions. No application code changed as part of these documentation updates. Citation-aware views, citation-style generation, HTML publishing, and metadata synchronization remain design goals, not implemented or tested behavior. The current implementation sequence and persistence verification gates below remain unchanged.
+The latest design update makes DVA's extension ecosystem more explicit. DVA should expose a documented extension API for panels/views, commands, content import/export, workspace-aware operations, and shared capabilities. Built-in examples such as File Finder and Sketch to Text should validate the same interfaces that community extensions would use. Extension lifecycle, permissions, compatibility, packaging/distribution, and native/external integration boundaries remain open design decisions. This is recorded in DVAInitialDesignDoc.md v0.12.0 alongside the citation-aware reading/writing, HTML-publication, and portable-metadata design goals. No application code changed as part of this documentation update. The extension ecosystem and those other features remain design goals, not implemented or tested behavior. The current implementation sequence and persistence verification gates below remain unchanged.
 
 ## Next implementation sequence
 
