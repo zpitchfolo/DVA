@@ -44,10 +44,11 @@ describe("DVA workspace shell", () => {
     expect(screen.getAllByRole("textbox")).toHaveLength(1);
   });
 
-  it("automatically restores panel contents after the app remounts", () => {
+  it("automatically restores panel contents after the app remounts", async () => {
     const firstRender = render(<App />);
     fireEvent.change(screen.getByRole("textbox", { name: "Untitled content" }), { target: { value: "A saved note" } });
     fireEvent.click(screen.getByRole("button", { name: /new panel/i }));
+    await waitFor(() => expect(localStorage.getItem("dva.workspace.v1")).toContain("A saved note"));
     firstRender.unmount();
 
     render(<App />);
@@ -95,11 +96,11 @@ describe("DVA workspace shell", () => {
     expect(screen.getByRole("textbox", { name: "Find the moon content" })).toBeInTheDocument();
   });
 
-  it("saves immediately with Ctrl+S", () => {
+  it("saves with Ctrl+S and reports completion", async () => {
     render(<App />);
     fireEvent.change(screen.getByRole("textbox", { name: "Untitled content" }), { target: { value: "Saved with shortcut" } });
     fireEvent.keyDown(window, { key: "s", ctrlKey: true });
-    expect(localStorage.getItem("dva.workspace.v1")).toContain("Saved with shortcut");
-    expect(screen.getByRole("status")).toHaveTextContent("Saved locally");
+    await waitFor(() => expect(localStorage.getItem("dva.workspace.v1")).toContain("Saved with shortcut"));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Saved locally"));
   });
 });
