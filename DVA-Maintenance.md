@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.1.0  
+**Document version:** 0.1.1  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -19,7 +19,7 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 - The app currently uses Ctrl/Cmd+P to open panel search. This conflicts with the agreed target of Ctrl/Cmd+F.
 - Ctrl/Cmd+S exists in code, but the user reports that it appears to do nothing. The next implementation should make the save action observable and ensure pending writes are flushed.
 - The app does not yet use the intended canonical workspace JSON file. Do not imply that native JSON persistence, migration, or workspace path selection already works.
-- Automated tests and production build have not been executed by this maintenance update. Check the current test record before making claims about verification.
+- Latest CI: [GitHub Actions run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029) passed `npm ci`, all 8 frontend tests, and `npm run build` on Ubuntu 24.04 / Node 22.23.3. This does not verify the Tauri desktop runtime, real close/reopen persistence, or native JSON persistence. See the [test record](DVA-Test-Record.md) for exact evidence.
 
 ## Decisions that must not be re-litigated without new evidence
 
