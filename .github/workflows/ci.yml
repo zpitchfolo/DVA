@@ -27,7 +27,7 @@ jobs:
       - name: Report dependency audit details
         run: |
           npm audit --json > npm-audit-report.json || true
-          node -e 'const report = require("./npm-audit-report.json"); const vulnerabilities = report.vulnerabilities ?? {}; const entries = Object.entries(vulnerabilities); console.log(`Audited packages with findings: ${entries.length}`); for (const [name, item] of entries) console.log(JSON.stringify({ name, severity: item.severity, direct: item.isDirect, range: item.range, fixAvailable: item.fixAvailable }));'
+          node -e 'const report = require("./npm-audit-report.json"); const vulnerabilities = report.vulnerabilities ?? {}; const entries = Object.entries(vulnerabilities); console.log(`Audited packages with findings: ${entries.length}`); for (const [name, item] of entries) console.log(JSON.stringify({ name, severity: item.severity, direct: item.isDirect, range: item.range, fixAvailable: item.fixAvailable, advisories: item.via.map((entry) => typeof entry === "string" ? entry : { title: entry.title, url: entry.url, range: entry.range }) }));'
       - name: Run tests
         run: npm test
       - name: Type-check and build
