@@ -1,8 +1,8 @@
 # DVA: Design Document
 
-**Version:** 0.6.7  
+**Version:** 0.6.8  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.6.6  
+**Previous version:** 0.6.7  
 **Motto:** Evidence over speculation.
 
 ## Version 0.6.7: Change Summary
@@ -1153,7 +1153,7 @@ Testing is required development work, not an optional final review. AI must run 
 
 ### Test record
 
-Maintain one current DVA test record describing the most recent test run: [DVA Test Record](DVA-Test-Record-v0.1.0.md). Update it after actual test execution. It must state explicitly when no tests have yet been run. The record is evidence of a run, not a substitute for executable tests.
+Maintain one current DVA test record describing the most recent test run: [DVA Test Record](DVA-Test-Record.md). Update it after actual test execution. It must state explicitly when no tests have yet been run. The record is evidence of a run, not a substitute for executable tests.
 
 These gates apply to the initial vertical slice and later changes. They are intended to prevent the project from accumulating features on top of an unverified foundation.
 
