@@ -9,7 +9,7 @@
 | Field | Result |
 |---|---|
 | Repository | [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA) |
-| Tested source commit | `87db1615d06f85139519b04ecf71425b458102e0` (docs-only commits after the implementation candidate; app source unchanged) |
+| Tested source commit | `18840cc589d560c2e03edf30e44d82db0833b95c` (includes the Ctrl+F shortcut and Vitest 4.1.12 dependency update) |
 | Changes included | Local-storage autosave/restore, explicit Save, Ctrl/Cmd+S, Ctrl/Cmd+N, Ctrl/Cmd+F panel search, regression tests |
 | Automated tests | **PASS**: 1 test file, 8 tests passed in GitHub Actions |
 | Type check and production build | **PASS**: `npm run build` completed (`tsc --noEmit && vite build`) |
@@ -47,7 +47,7 @@
 3. Run `npm run build`.
 4. Launch the desktop app with `npm run tauri dev`.
 5. Enter text, create multiple panels, close and reopen the app, and confirm all remaining panel content returns.
-6. Exercise Ctrl+N, Ctrl+F search, Ctrl+S, and the Save button in the desktop runtime. Current code still uses Ctrl+P until implementation is updated.
+6. Exercise Ctrl+N, Ctrl+F search, Ctrl+S, and the Save button in the desktop runtime. The shortcut is Ctrl+F in the current implementation.
 7. Inspect the Git diff and update this record with exact outcomes only after the commands and checks actually run.
 
 ## Known gaps and stop conditions
