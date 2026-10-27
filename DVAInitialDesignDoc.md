@@ -15,7 +15,7 @@ This update records the agreed direction for compact, clearly named file operati
 - Use clear, consistent names across menus, panels, and context menus. The File menu is the canonical place to discover operations; right-click menus expose relevant contextual actions as an additional route.
 - Working labels: **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. These distinguish the workspace JSON from ordinary text files. Exact wording may be refined while preserving that distinction.
 - The in-app **Files** panel is the ordinary folder explorer for browsing and opening text files and other supported file types.
-- Do not add keyboard shortcuts for the newly discussed File menu operations as part of this design pass. The scope of this preference relative to existing prototype shortcuts remains to be reconciled explicitly; this update does not silently remove previously documented shortcut behavior.
+- Preserve all existing keyboard shortcuts. Do not add new shortcuts for File menu operations or other features unless the user explicitly requests them. Existing shortcuts such as Ctrl/Cmd+S, Ctrl/Cmd+F, and Ctrl/Cmd+N remain unchanged.
 
 ### Panel placement and drag-and-drop
 
@@ -778,7 +778,7 @@ These are plain-named views that may overlap in purpose.
 
 **Files:** An in-app folder explorer. Multiple folder panes may remain open. Drag-and-drop supports movement between panes. The file browser itself is an ordinary panel, not a special navigation layer that hides the real file structure. Users should be able to open files and supported metadata/configuration files as panels, and edit them in place when appropriate.
 
-**File menu and contextual actions:** The File menu is the central place to discover workspace and file operations. For now, it contains the complete set of these operations without requiring permanent buttons for each one. Use clear, consistent names across the File menu, Files panel, and right-click menus. Right-click menus expose relevant contextual actions but do not replace the File menu. Working labels are **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. These labels distinguish loading/saving the whole workspace JSON from opening an ordinary file. Do not add keyboard shortcuts for these newly discussed File menu operations during this design pass; reconcile their scope against existing prototype shortcuts explicitly rather than silently changing existing behavior.
+**File menu and contextual actions:** The File menu is the central place to discover workspace and file operations. For now, it contains the complete set of these operations without requiring permanent buttons for each one. Use clear, consistent names across the File menu, Files panel, and right-click menus. Right-click menus expose relevant contextual actions but do not replace the File menu. Working labels are **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. These labels distinguish loading/saving the whole workspace JSON from opening an ordinary file. Preserve all existing keyboard shortcuts, including Ctrl/Cmd+S, Ctrl/Cmd+F, and Ctrl/Cmd+N. Do not add shortcuts for these new operations or other features unless the user explicitly requests them.
 
 **External drag-and-drop:** Dropping a supported external file into the workspace opens it in a new panel or tab according to the visible placement preview, without unexpectedly replacing existing content. Intended future file types include text files, images, PDFs, and other supported files or content from external applications. A drop onto the Files panel is a file-management interaction rather than an instruction to open the item in the workspace; exact copy/move behavior remains open. Actual support depends on file type, integration, and security constraints.
 
@@ -1150,7 +1150,7 @@ These are design goals, not a claim that each has been implemented or verified.
 - Folder explorer operations.
 - Search result presentation and filtering.
 - How transient related panels appear and disappear.
-- Whether the no-shortcut preference for newly discussed File menu operations also supersedes existing prototype shortcuts such as Ctrl/Cmd+S; do not infer a global shortcut removal without an explicit decision.
+
 
 ### Save history
 
