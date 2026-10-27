@@ -36,7 +36,7 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 - Panels remain movable and resizable after a split; splitting does not lock the new panel in place.
 - The workspace layout has no horizontal scrolling; workspace-level overflow is vertical only. Horizontal splits remain allowed. Content-specific zooming or panning is separate from workspace scrolling.
 - Intended future external drop support includes text files, images, PDFs, and other supported files/content from other applications. Support and copy/move behavior depend on file type and drop target; this is design intent, not implemented behavior.
-- Do not add keyboard shortcuts for the newly discussed File menu operations during this design pass. The scope of this preference relative to existing prototype shortcuts, especially Ctrl/Cmd+S, is unresolved and must not be guessed or silently changed.
+- Preserve all existing keyboard shortcuts, including Ctrl/Cmd+S, Ctrl/Cmd+F, and Ctrl/Cmd+N. Do not add new shortcuts for File menu operations or other features unless the user explicitly requests them.
 
 ### Workspace JSON and location
 
@@ -53,7 +53,7 @@ Reference: [Tauri configuration](https://v2.tauri.app/reference/config/) and [Ta
 ### Existing prototype keyboard shortcuts and save feedback
 
 - The current prototype has documented Ctrl/Cmd+F for Find/search, Ctrl/Cmd+S for Save/flush pending writes, and Ctrl/Cmd+N for New Panel.
-- The recent design discussion does not add shortcuts to the new File menu operations. Whether it supersedes the existing Ctrl/Cmd+S behavior is unresolved; do not silently remove or extend shortcuts until that is clarified.
+- No new shortcuts are added for the File menu operations. Existing shortcut behavior remains unchanged unless the user explicitly requests a change.
 - Search currently covers panel titles and content. Do not claim it searches files or the entire workspace.
 - Keep implemented shortcuts, visible labels, tests, and documentation aligned.
 
