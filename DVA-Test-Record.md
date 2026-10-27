@@ -1,7 +1,7 @@
 # DVA Test Record
 
-**Document version:** 0.4.0  
-**Current status:** Frontend automated tests and production build passed in GitHub Actions for commit `87db1615d06f85139519b04ecf71425b458102e0`. Desktop runtime, real close/reopen persistence, and native JSON persistence remain unverified by CI. User reports that content survives closing and reopening.  
+**Document version:** 0.5.0  
+**Current status:** Frontend tests, production build, and npm audit passed in GitHub Actions for commit `18840cc589d560c2e03edf30e44d82db0833b95c`. Vitest and its `@vitest/*` family are updated to 4.1.12, resolving the two previously reported moderate findings. Desktop runtime, real close/reopen persistence, and native JSON persistence remain unverified by CI. User reports that content survives closing and reopening.  
 **Accepted application baseline:** The earlier frontend-only run belongs to the old `zpitchfolo/DVAexe` repository and does not establish acceptance of the current `zpitchfolo/DVA` source.
 
 ## Current candidate
@@ -10,7 +10,7 @@
 |---|---|
 | Repository | [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA) |
 | Tested source commit | `87db1615d06f85139519b04ecf71425b458102e0` (docs-only commits after the implementation candidate; app source unchanged) |
-| Changes included | Local-storage autosave/restore, explicit Save, Ctrl/Cmd+S, Ctrl/Cmd+N, Ctrl/Cmd+P panel search, regression tests |
+| Changes included | Local-storage autosave/restore, explicit Save, Ctrl/Cmd+S, Ctrl/Cmd+N, Ctrl/Cmd+F panel search, regression tests |
 | Automated tests | **PASS**: 1 test file, 8 tests passed in GitHub Actions |
 | Type check and production build | **PASS**: `npm run build` completed (`tsc --noEmit && vite build`) |
 | CI | **PASS**: [GitHub Actions run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029), Ubuntu 24.04, Node 22.23.3, npm 10.9.9; `npm ci`, `npm test`, and `npm run build` all succeeded |
@@ -18,7 +18,18 @@
 | Save/restart acceptance | User reports content survives close/reopen; not independently verified in this environment |
 | Dependency audit warning | `npm ci` reported 2 moderate-severity vulnerabilities; no audit remediation was attempted in this run |\n| Overall result | **FRONTEND CI PASS. APP ACCEPTANCE STILL PENDING.** |
 
-## Latest executed run\n\n- Workflow: [DVA frontend checks, run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029)\n- Tested commit: `87db1615d06f85139519b04ecf71425b458102e0`\n- Environment: Ubuntu 24.04.5 LTS; Node.js 22.23.3; npm 10.9.9; Vitest 4.1.11.\n- `npm ci`: PASS; installed 118 packages, audited 119; reported 2 moderate vulnerabilities.\n- `npm test`: PASS; 1 test file, 8 tests passed.\n- `npm run build`: PASS; TypeScript check and Vite production build succeeded.\n- This was a hosted frontend CI run, not a local run in the user’s Windows environment. It did not launch the Tauri desktop app or test native filesystem persistence.\n\n## Test coverage added
+## Latest executed run
+
+- Workflow: [DVA frontend checks, run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309)
+- Tested commit: `18840cc589d560c2e03edf30e44d82db0833b95c`
+- Environment: Ubuntu 24.04.5 LTS; Node.js 22.23.3; npm 10.9.9; Vitest 4.1.12.
+- `npm ci`: PASS.
+- `npm audit`: PASS; 0 vulnerabilities reported.
+- `npm test`: PASS; 1 test file, 8 tests passed.
+- `npm run build`: PASS; TypeScript check and Vite production build succeeded.
+- This was a hosted frontend CI run, not a local run in the user’s Windows environment. It did not launch the Tauri desktop app or test native filesystem persistence.
+
+## Test coverage added
 
 - Initial editable panel renders.
 - Creating a panel preserves the first panel.
@@ -26,7 +37,7 @@
 - Empty state allows creating a panel again.
 - Editing and creating panels persists and restores after remount.
 - Ctrl/Cmd+N creates a panel.
-- Ctrl/Cmd+P opens search and selecting a result focuses the matching panel in the current code. The agreed target is Ctrl/Cmd+F; update the test when the shortcut changes.
+- Ctrl/Cmd+F opens search and selecting a result focuses the matching panel.
 - Ctrl/Cmd+S writes the current workspace snapshot and reports local-save status.
 
 ## Required next verification
@@ -36,7 +47,7 @@
 3. Run `npm run build`.
 4. Launch the desktop app with `npm run tauri dev`.
 5. Enter text, create multiple panels, close and reopen the app, and confirm all remaining panel content returns.
-6. Exercise Ctrl+N, the agreed Ctrl+F search shortcut, Ctrl+S, and the Save button in the desktop runtime. Current code still uses Ctrl+P until implementation is updated.
+6. Exercise Ctrl+N, Ctrl+F search, Ctrl+S, and the Save button in the desktop runtime. Current code still uses Ctrl+P until implementation is updated.
 7. Inspect the Git diff and update this record with exact outcomes only after the commands and checks actually run.
 
 ## Known gaps and stop conditions
