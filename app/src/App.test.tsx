@@ -56,10 +56,10 @@ describe("DVA workspace shell", () => {
     expect(screen.getAllByRole("textbox")).toHaveLength(2);
   });
 
-  it("opens panel search with Ctrl+P and jumps to a matching panel", () => {
+  it("opens panel search with Ctrl+F and jumps to a matching panel", () => {
     render(<App />);
     fireEvent.change(screen.getByRole("textbox", { name: "Untitled content" }), { target: { value: "Find the moon" } });
-    fireEvent.keyDown(window, { key: "p", ctrlKey: true });
+    fireEvent.keyDown(window, { key: "f", ctrlKey: true });
     const search = screen.getByRole("textbox", { name: "Search panels" });
     fireEvent.change(search, { target: { value: "moon" } });
     fireEvent.keyDown(search, { key: "Enter" });
