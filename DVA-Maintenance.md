@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.1.2  
+**Document version:** 0.1.3  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -15,9 +15,11 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 - DVA is a Tauri 2 + React + TypeScript + Vite desktop prototype.
 - The current UI supports editable panels, panel creation/closing, panel search, a Save action, autosave, and keyboard shortcuts.
 - Search is Ctrl/Cmd+F, New Panel is Ctrl/Cmd+N, and Save is Ctrl/Cmd+S.
-- Current persistence uses WebView `localStorage` with key `dva.workspace.v1`. This is temporary implementation storage, not the agreed canonical workspace JSON file.
-- The user reports that writing survives closing and reopening the app. Keep this labeled as user-reported until the desktop restart flow is independently tested.
-- Native JSON persistence, schema validation, user-selectable workspace location, localStorage-to-JSON migration, and recovery from malformed or interrupted writes are not implemented yet.
+- Desktop source now uses a versioned native `workspace.json` through two narrow Rust commands, with a temporary file, read-back validation, and a `.bak` copy before replacing an existing file. This source has not yet passed the new native CI job or desktop-runtime acceptance.
+- Browser preview retains `dva.workspace.v1` localStorage. When native JSON is absent, valid browser data is copied into JSON and verified; the original localStorage value is intentionally retained.
+- Invalid browser data or native JSON blocks initialization/autosave and shows a recovery state rather than silently replacing the data with a starter workspace.
+- The JSON schema is documented in `DVAInitialDesignDoc.md` v0.8.0. User-selected workspace locations remain unimplemented.
+- The user reports that writing survives closing and reopening the app. Keep this labeled as user-reported until the new JSON-backed desktop restart flow is independently tested.
 - Dependency update: Vitest and the `@vitest/*` family are at 4.1.12.
 - Verified CI: [GitHub Actions run #20](https://github.com/zpitchfolo/DVA/actions/runs/40445241936) passed on the documentation-update commit `7237356dbb809efeba28cfcd72687e051a8062ca`. The preceding tested dependency candidate, commit `18840cc589d560c2e03edf30e44d82db0833b95c`, passed `npm ci`, `npm audit` (0 vulnerabilities), `npm test` (8 tests), and `npm run build` in [run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309). These are hosted frontend checks, not a Windows desktop-runtime or native-persistence test.
 - See [DVA-Test-Record.md](DVA-Test-Record.md) for the detailed evidence. Keep older conflicting text corrected in that file rather than treating it as current.
@@ -58,20 +60,20 @@ Keep one current copy of each document. Update in place, bump that document's ow
 
 ## Next implementation sequence
 
-The next milestone is **canonical JSON persistence with safe migration**, not adding more surface features. Work in small, verifiable slices.
+The current candidate is **canonical JSON persistence with guarded migration**. Source and regression tests have been committed; the current CI run must verify the frontend and native Rust schema tests. Real desktop acceptance remains a separate gate.
 
 ### 1. Establish the baseline
 
 - Inspect the current branch, working tree, latest commit, relevant source, tests, and CI workflow.
 - Read the latest design document, this guide, and the test record.
-- Run `npm ci`, `npm audit`, `npm test`, and `npm run build` from `app/` when the environment permits.
-- Record exact commands, candidate commit, exit codes, and output. If a command cannot run, mark it **NOT RUN** and explain why.
+- CI now runs frontend checks plus `cargo test --manifest-path app/src-tauri/Cargo.toml` on Ubuntu with Tauri's Linux build dependencies. Confirm the run's final result before accepting the source.
+- The connected GitHub workflow is the available test executor here; the assistant has not launched the Windows desktop runtime. Record exact CI run links and keep desktop acceptance pending.
 - Keep the current user data and last known good commit recoverable before implementation.
 
 ### 2. Specify the smallest safe persistence slice
 
 Before coding, define observable acceptance checks and settle only the schema details needed for the first migration:
-- A versioned workspace JSON document contains panel content and the active-panel/workspace state currently persisted by the prototype.
+- A schemaVersion 1 workspace JSON document contains panel content and active-panel state, matching `DVAInitialDesignDoc.md` v0.8.0.
 - DVA uses an app-specific writable data directory by default.
 - The application can report the actual workspace path.
 - Missing data, invalid JSON, unsupported schema versions, and write failures produce explicit recoverable outcomes.
@@ -84,7 +86,7 @@ Do not prematurely implement every future workspace concept in the design docume
 
 - Choose a narrowly scoped Tauri/Rust command or permission-scoped Tauri API appropriate to the current Tauri configuration.
 - Add schema validation and a clear schema version.
-- Implement safe writes using a temporary file and validated replacement/backup strategy.
+- Current source writes a temporary file, flushes and reads it back, retains a `.bak` copy before replacing an existing file, and validates the installed document. Verify behavior through Rust tests and desktop acceptance; do not overstate this as proven atomic replacement.
 - Migrate localStorage content without discarding the source before verification.
 - Handle first launch, repeat launch, malformed source, malformed target, unsupported versions, write/permission errors, and retry after interruption.
 - Make the current workspace path and save status discoverable in the UI.
@@ -94,11 +96,12 @@ Do not prematurely implement every future workspace concept in the design docume
 
 Automated checks should cover at least:
 - Serialization/deserialization round-trip of panels and active-panel state.
-- Schema validation and unsupported versions.
-- Migration from valid localStorage data.
-- Preservation of source data on write/validation failure.
+- Rejection of unsupported schema versions, duplicate IDs, and invalid active-panel references.
+- Frontend preservation of malformed and structurally invalid localStorage values without autosaving a starter workspace over them.
+- Migration from valid localStorage data only when native JSON is missing; the original source is retained.
+- Preservation of a prior native JSON backup on replacement failure.
 - Missing, malformed, and partially written JSON recovery behavior.
-- Repeat migration/startup without data loss or duplication.
+- Repeat startup without data loss or duplication.
 - Save status and relevant keyboard behavior.
 
 Then run `npm ci`, `npm audit`, `npm test`, and `npm run build`. Add native Rust/Tauri tests where the chosen implementation allows them.
