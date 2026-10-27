@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 
@@ -48,6 +48,29 @@ describe("DVA workspace shell", () => {
     render(<App />);
     expect(screen.getByRole("textbox", { name: "A saved note content" })).toHaveValue("A saved note");
     expect(screen.getAllByRole("textbox")).toHaveLength(2);
+  });
+
+  it("preserves malformed saved data and pauses autosave for recovery", async () => {
+    const original = "{ this is not valid JSON and must survive }";
+    localStorage.setItem("dva.workspace.v1", original);
+
+    render(<App />);
+
+    expect(await screen.findByText("Your saved writing was not replaced.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Original saved workspace data" })).toHaveValue(original);
+    expect(localStorage.getItem("dva.workspace.v1")).toBe(original);
+    expect(screen.getByRole("button", { name: /save/i })).toBeDisabled();
+  });
+
+  it("preserves structurally invalid saved data rather than replacing it with a starter workspace", async () => {
+    const original = JSON.stringify({ panels: [{ id: "bad", title: "Lost?", content: "Keep me" }], activePanelId: 1 });
+    localStorage.setItem("dva.workspace.v1", original);
+
+    render(<App />);
+
+    expect(await screen.findByText("Your saved writing was not replaced.")).toBeInTheDocument();
+    await waitFor(() => expect(localStorage.getItem("dva.workspace.v1")).toBe(original));
+    expect(screen.queryByRole("textbox", { name: /content/i })).not.toBeInTheDocument();
   });
 
   it("creates a panel with Ctrl+N", () => {
