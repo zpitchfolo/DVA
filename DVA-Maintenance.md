@@ -18,7 +18,7 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 - Desktop source now uses a versioned native `workspace.json` through two narrow Rust commands, with a temporary file, read-back validation, and a `.bak` copy before replacing an existing file. This source has not yet passed the new native CI job or desktop-runtime acceptance.
 - Browser preview retains `dva.workspace.v1` localStorage. When native JSON is absent, valid browser data is copied into JSON and verified; the original localStorage value is intentionally retained.
 - Invalid browser data or native JSON blocks initialization/autosave and shows a recovery state rather than silently replacing the data with a starter workspace.
-- The JSON schema is documented in `DVAInitialDesignDoc.md` v0.8.0. User-selected workspace locations remain unimplemented.
+- The current design document is `DVAInitialDesignDoc.md` v0.9.0. User-selected workspace locations remain unimplemented.
 - The user reports that writing survives closing and reopening the app. Keep this labeled as user-reported until the new JSON-backed desktop restart flow is independently tested.
 - Dependency update: Vitest and the `@vitest/*` family are at 4.1.12.
 - Verified CI: [GitHub Actions run #20](https://github.com/zpitchfolo/DVA/actions/runs/40445241936) passed on the documentation-update commit `7237356dbb809efeba28cfcd72687e051a8062ca`. The preceding tested dependency candidate, commit `18840cc589d560c2e03edf30e44d82db0833b95c`, passed `npm ci`, `npm audit` (0 vulnerabilities), `npm test` (8 tests), and `npm run build` in [run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309). These are hosted frontend checks, not a Windows desktop-runtime or native-persistence test.
