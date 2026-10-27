@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.1.4  
+**Document version:** 0.2.0  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -26,6 +26,18 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 
 ## Decisions that must not be re-litigated without new evidence
 
+### File operations and panel interaction (design decisions; not yet implemented)
+
+- The File menu is the central discoverable place for workspace and file operations. Keep the always-visible UI compact rather than adding a permanent button for every operation.
+- Use consistent, explicit names across UI locations. Current working labels are **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. The workspace JSON and ordinary files must never be presented as interchangeable concepts.
+- The Files panel is the ordinary in-app folder explorer. Right-click menus provide relevant contextual routes without replacing the File menu as the canonical place to discover operations.
+- Dragging a supported external file into the workspace opens it in a new panel or tab based on where the user drops it. A live preview shows the resulting layout, including panels sliding or resizing before the drop commits.
+- A drop over a tab area targets a tab; a drop at an edge targets a split in that direction; a drop into open space, including beneath existing panels, targets a new panel there. The user's drop location communicates intent.
+- Panels remain movable and resizable after a split; splitting does not lock the new panel in place.
+- The workspace layout has no horizontal scrolling; workspace-level overflow is vertical only. Horizontal splits remain allowed. Content-specific zooming or panning is separate from workspace scrolling.
+- Intended future external drop support includes text files, images, PDFs, and other supported files/content from other applications. Support and copy/move behavior depend on file type and drop target; this is design intent, not implemented behavior.
+- Do not add keyboard shortcuts for the newly discussed File menu operations during this design pass. The scope of this preference relative to existing prototype shortcuts, especially Ctrl/Cmd+S, is unresolved and must not be guessed or silently changed.
+
 ### Workspace JSON and location
 
 1. Workspace JSON is the canonical home for working content and workspace state, not merely a settings file or backup.
@@ -38,13 +50,12 @@ Follow the [Development State Machine Workflow v1.5.0](https://github.com/zpitch
 
 Reference: [Tauri configuration](https://v2.tauri.app/reference/config/) and [Tauri filesystem plugin](https://v2.tauri.app/plugin/file-system/).
 
-### Keyboard shortcuts and save feedback
+### Existing prototype keyboard shortcuts and save feedback
 
-- Ctrl/Cmd+F: Find/search.
-- Ctrl/Cmd+S: Save/flush pending writes and display a clear success or failure state.
-- Ctrl/Cmd+N: New panel.
+- The current prototype has documented Ctrl/Cmd+F for Find/search, Ctrl/Cmd+S for Save/flush pending writes, and Ctrl/Cmd+N for New Panel.
+- The recent design discussion does not add shortcuts to the new File menu operations. Whether it supersedes the existing Ctrl/Cmd+S behavior is unresolved; do not silently remove or extend shortcuts until that is clarified.
 - Search currently covers panel titles and content. Do not claim it searches files or the entire workspace.
-- Keep shortcut labels, implementation, tests, and documentation aligned.
+- Keep implemented shortcuts, visible labels, tests, and documentation aligned.
 
 ## Current files
 
@@ -57,6 +68,10 @@ Reference: [Tauri configuration](https://v2.tauri.app/reference/config/) and [Ta
 - `.github/workflows/ci.yml`: CI workflow for dependency installation, audit details, tests, and production build.
 
 Keep one current copy of each document. Update in place, bump that document's own SemVer, inspect the diff, and use Git history as the archive. Do not create version-suffixed duplicates.
+
+## Recent design decisions not yet implemented
+
+The latest design discussion refined File menu naming/discoverability, external file drag-and-drop, pointer-directed panel placement, movable panels, and vertical-only workspace scrolling. These decisions are recorded in DVAInitialDesignDoc.md v0.9.0. No application code changed as part of that discussion. The current implementation sequence and persistence verification gates below remain unchanged.
 
 ## Next implementation sequence
 
