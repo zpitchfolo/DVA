@@ -1,13 +1,13 @@
 # DVA: Design Document
 
-**Version:** 0.9.0  
+**Version:** 0.10.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.8.0  
+**Previous version:** 0.9.0  
 **Motto:** Evidence over speculation.
 
-## Version 0.9.0: Change Summary
+## Version 0.10.0: Change Summary
 
-This update records the agreed direction for compact, clearly named file operations; pointer-directed panel placement and preview; movable panels after splitting; external-file drag-and-drop into the workspace or Files panel; and vertical-only workspace scrolling. These are design decisions, not claims that the behaviors have been implemented or tested.
+This update establishes workspace publishing as a first-class export goal: a workspace can be rendered as a browser-readable HTML experience so recipients can explore the work without installing DVA. It also clarifies that workspace JSON remains authoritative for DVA metadata, while supported metadata and marks may be embedded in standalone text files through explicit save/export behavior and selectable export profiles. These are design decisions, not claims that publishing or metadata synchronization has been implemented or tested.
 
 ### File operations and naming
 
@@ -963,9 +963,23 @@ It does not replace the original item or change its identity.
 
 **Structured:** Content can be exported with companion data for comments, iterations, or metadata.
 
+**HTML publication:** Render the workspace itself as a browser-readable publication. The export should preserve the author's panel arrangement, navigation, and supported links/relationships so the workspace can be the work, rather than forcing the author to rebuild it as a conventional document. Recipients should be able to open and explore the published result in an ordinary browser without installing DVA. The default publication is read-only but interactive for navigation; editing published copies and synchronizing edits back to DVA are separate capabilities, not implied by HTML export.
+
+HTML output may be a single self-contained file when practical, or a folder/package containing HTML, assets, and data when that is more reliable for the workspace's size or linked resources. Do not promise that every workspace can be represented faithfully in one file. Unsupported content and external references must be handled explicitly rather than silently omitted or broken.
+
+### Metadata and export profiles
+
+Workspace JSON remains the authoritative source for DVA metadata, marks, comments, and relationships. When saving or exporting a standalone text file, DVA may serialize supported metadata and marks into that file as a portable copy, such as YAML front matter in Markdown. This copy does not become a second authoritative source.
+
+- Opening or adding an existing file should not silently rewrite it merely to insert metadata.
+- Saving a file with DVA metadata embedding enabled, or choosing an export profile that includes metadata, may write the supported representation into the output file.
+- Export profiles can include or omit marks and metadata, allowing full/structured output as well as clean text intended for readers or other tools.
+- Formats without a suitable in-file convention, such as ordinary `.txt`, need an explicit format choice or a companion metadata file if metadata must travel separately from the clean text.
+- If a file's embedded metadata is edited outside DVA, reconciliation with the workspace JSON needs an explicit conflict policy; DVA must not silently overwrite either version without a defined rule.
+
 Iteration output may be inline, separated, omitted from the main text, or presented in both forms.
 
-The user chooses the output. Defaults can evolve from observed use.
+The user chooses the output. Defaults can evolve from observed use. Publishing profiles should be reusable so a creator can generate different reader experiences from the same workspace without rebuilding it.
 
 An exported file behaves like any other file. It can be opened, edited, referenced, versioned, and exported again.
 
