@@ -1,9 +1,13 @@
 # DVA: Design Document
 
-**Version:** 0.10.0  
+**Version:** 0.11.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.9.0  
+**Previous version:** 0.10.0  
 **Motto:** Evidence over speculation.
+
+## Version 0.11.0: Change Summary
+
+This update adds an example of citation-aware reading and writing to the existing mark, annotation, metadata, and export model. A citation can remain semantically attached to relevant text while its presentation changes by view: unobtrusive annotation in reading view, visible citation while composing or reviewing, and conventional inline citation plus bibliography output when exported. This refines existing design principles; it does not claim the behavior is implemented or tested.
 
 ## Version 0.10.0: Change Summary
 
@@ -338,6 +342,8 @@ Content belongs in one of two conceptual places.
 
 Views may derive information from content, but they should not silently become competing sources of truth.
 
+The same underlying text and metadata may have different presentations for different tasks. For example, a research citation can remain attached to the sentence or passage it references while a reading view displays it as a small contextual annotation rather than interrupting the prose. A composing or review view can show the citation inline, and a conventional-paper export can render it inline in the required citation style. These are views of the same relationship, not separate manually maintained citations.
+
 ## 8. Open Items
 
 A item is the content or view a tab points to.
@@ -526,6 +532,17 @@ This may produce awkward results in some cases. Consistency is preferable to unp
 | `|` | Attribute or key-value structure |
 
 These are sane defaults, not a mandatory universal vocabulary. Users can remap mark syntax and define additional mark types.
+
+### Citation and reference presentation
+
+Citations and references can use the existing mark, annotation, and metadata model rather than requiring a separate copy of the text for each reading style. The citation's semantic association with its relevant text is stored in workspace metadata; the visible citation and its placement are presentation choices.
+
+For example, a research passage may read naturally in Reading View while a citation such as `(Smith, 2026)` appears in a small contextual annotation beside the passage or in an associated reference pane. The reader can inspect the source without the citation interrupting the sentence. In Writing or Review View, the same citation can appear inline. A conventional research-paper export can render the inline citation and corresponding bibliography entry using the selected style.
+
+- Keep the citation associated with the relevant text when the text is edited or rearranged, using the workspace's anchor and relationship rules.
+- Let the user inspect the source without forcing the reading presentation to use the same layout as a conventional paper.
+- Keep the semantic relationship in workspace JSON; changing its visual placement must not create a second citation record or detach it from its text.
+- Treat reading, writing, review, and export as presentation modes over the same underlying material. Do not imply that the current prototype already implements these modes or automatic citation-style generation.
 
 ### Mark Index and navigation
 
@@ -962,6 +979,8 @@ It does not replace the original item or change its identity.
 **Full:** Marks remain inline as literal text, readable and searchable.
 
 **Structured:** Content can be exported with companion data for comments, iterations, or metadata.
+
+**Citation-aware views and export:** Citation metadata can remain attached to its relevant text while different views present it differently. Reading View may move the visible citation into a contextual annotation or reference pane to preserve prose flow; Writing or Review View may display it inline; conventional-paper export may render inline citations and a bibliography in the selected citation style. The chosen presentation must not change the underlying citation relationship. Citation-style support, bibliography generation, and the exact view controls remain design details to validate before implementation.
 
 **HTML publication:** Render the workspace itself as a browser-readable publication. The export should preserve the author's panel arrangement, navigation, and supported links/relationships so the workspace can be the work, rather than forcing the author to rebuild it as a conventional document. Recipients should be able to open and explore the published result in an ordinary browser without installing DVA. The default publication is read-only but interactive for navigation; editing published copies and synchronizing edits back to DVA are separate capabilities, not implied by HTML export.
 
