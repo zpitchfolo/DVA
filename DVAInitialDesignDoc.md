@@ -1,35 +1,67 @@
 # DVA: Design Document
 
-**Version:** 0.7.0  
+**Version:** 0.8.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.6.9  
+**Previous version:** 0.7.0  
 **Motto:** Evidence over speculation.
 
-## Version 0.7.0: Change Summary
+## Version 0.8.0: Change Summary
 
-This update records the agreed persistence destination model, the Ctrl/Cmd+F search shortcut, and the maintenance/handoff process. It does not implement these runtime changes.
+This update defines the first concrete workspace JSON schema and records the implementation boundary for native persistence and guarded migration. Code is now present for the first schema and save/load path, but automated CI and real desktop restart acceptance must still verify it before it can be called working.
 
 ### Workspace persistence decision
 
-- The workspace's canonical working state is a JSON file, including embedded writing and panel/workspace state.
-- The default location should be DVA's dedicated, writable app-data location, not the installation directory by assumption. This supports installed builds where the app's install directory may not be writable.
-- Portable builds may use a dedicated `app-data` directory beside the executable when the distribution explicitly configures that writable location. Do not point the data override at the executable directory itself or a broad user folder.
-- Users should be able to choose another workspace location. The architecture should allow opening/saving a workspace elsewhere without making that a prerequisite for writing.
-- The existing localStorage workspace must be migrated into JSON without silently discarding content. Migration should preserve the old data until the new JSON has been written and verified.
-- This is the agreed target architecture, not evidence that native JSON persistence, location selection, or migration has been implemented.
+- The canonical workspace is a JSON file containing writing and the current panel/workspace state.
+- The current first schema is intentionally small and versioned. It records only what the prototype currently needs; it is not the final full workspace model.
+- The default location is Tauri's app-specific writable data directory, in `workspace.json`. Never assume the installed application's directory is writable.
+- Portable builds may configure a dedicated writable `app-data` directory. User-selected workspace locations remain a planned extension, not implemented behavior.
+- The existing `dva.workspace.v1` localStorage source is retained after migration. It is not removed as part of migration.
+- Native load/save commands and a guarded localStorage migration path are now implemented in source. They are not considered verified until CI passes and the actual desktop close/reopen flow is tested.
+
+#### First workspace JSON schema (schemaVersion 1)
+
+```json
+{
+  "schemaVersion": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Untitled",
+      "content": "Your writing goes here."
+    }
+  ],
+  "activePanelId": 1
+}
+```
+
+Field meanings and validation:
+- `schemaVersion`: required integer identifying the document format. The first implementation accepts version `1`; unknown versions are rejected rather than guessed at.
+- `panels`: ordered array of panel records. Each has a positive, unique numeric `id`, a string `title`, and string `content`. An empty array is valid when the user closes the final panel.
+- `activePanelId`: ID of the currently active panel. For a non-empty panel list it must reference an existing panel. When the list is empty, the current prototype uses `0`.
+- Future workspace fields such as windows, panes, tabs, marks, file references, cursor positions, settings, history, and relationships should be added through deliberate schema evolution rather than silently inferred from this first schema.
+
+#### File lifecycle and recovery contract
+
+- Native path: Tauri app-data directory + `workspace.json`; the resolved path is shown in the workspace's bottom hint layer.
+- Save strategy: serialize to `workspace.json.tmp`, flush and read it back, validate it, preserve the previous file as `workspace.json.bak` when replacing an existing file, then verify the installed document.
+- Startup: if valid JSON exists, load it. If it is missing, migrate a valid `dva.workspace.v1` browser-storage snapshot; if neither exists, create the initial workspace JSON.
+- Migration only runs when the native JSON file is missing. The old localStorage value is not deleted.
+- Malformed localStorage, invalid JSON, unsupported schema versions, or native load errors pause initialization and autosave. DVA must not silently initialize a starter workspace over data it could not read.
+- A failed save is reported visibly. The in-memory text remains available while the app is open, but the user must not assume that a failed save has reached disk.
+- The backup file is a recovery aid, not yet a user-facing version-history system. Restore UI, user-selected locations, and broader import/export remain future work.
 
 Tauri supports app-specific data directories and explicit directory overrides, including portable-build layouts. The implementation must account for platform-specific writability and use least-privilege filesystem access: [Tauri configuration reference](https://v2.tauri.app/reference/config/) and [Tauri filesystem plugin](https://v2.tauri.app/plugin/file-system/).
 
 ### Keyboard and save behavior
 
 - The agreed search/find shortcut is Ctrl/Cmd+F. Ctrl/Cmd+P is not the intended shortcut.
-- The current prototype still uses Ctrl/Cmd+P, so implementation and the visible keyboard hint remain out of sync with the agreed design until changed and tested.
+- The current source implements Ctrl/Cmd+F; verify the shortcut in automated tests and the desktop runtime before accepting it.
 - Ctrl/Cmd+S must produce an observable result. It should flush pending workspace writes and communicate success or failure, rather than appearing inert when autosave has already run.
 - Search scope for the current prototype is panel titles and panel content. Broader file/workspace search is future behavior, not implied by this shortcut change.
 
 ### Existing implementation boundary
 
-The current prototype stores panel content and active-panel state in WebView localStorage under `dva.workspace.v1`. The user reports that content survives closing and reopening the app. That is useful manual evidence, but it does not change the architecture decision: localStorage remains a temporary implementation, not the canonical JSON workspace. Automated tests, production build, and the native JSON migration have not been independently verified by this documentation update.
+The current source stores the canonical desktop workspace in native `workspace.json` through narrow Rust commands and keeps browser localStorage as a migration source/fallback for non-Tauri preview. The code also pauses initialization when stored data cannot be validated. These are source-level implementation facts, not proof that the native runtime works: CI, Rust tests, and real desktop close/reopen acceptance must establish that.
 
 ### Maintenance and recovery
 
