@@ -1,9 +1,13 @@
 # DVA: Design Document
 
-**Version:** 0.11.0  
+**Version:** 0.12.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.10.0  
+**Previous version:** 0.11.0  
 **Motto:** Evidence over speculation.
+
+## Version 0.12.0: Change Summary
+
+This update makes the extension ecosystem a more explicit part of DVA's modular workspace design. DVA should provide a stable, documented extension interface so built-in and community-created tools can contribute panels, commands, content views, import/export handlers, and shared capabilities. The File Finder and Sketch to Text are examples of tools that should be able to use these interfaces rather than requiring their functionality to be hardwired into the core. The API, packaging, discovery, permissions, and compatibility rules remain design work; this does not claim an extension system is implemented or tested.
 
 ## Version 0.11.0: Change Summary
 
@@ -507,6 +511,29 @@ Not every app must support every operation. The integration contract should decl
 DVA should make it possible to add or replace modules without redesigning the entire workspace. A module should have a defined entry point, supported lifecycle, clear data ownership, and an explicit way to communicate with DVA. The exact module API, discovery mechanism, permissions, and packaging strategy remain open design questions.
 
 Security is part of the architecture. Embedded websites and external tools must not automatically gain unrestricted access to DVA's files, workspace data, or native commands. Access should be explicit and scoped. Arbitrary native desktop windows cannot be assumed to behave like React components, and some websites cannot be embedded because of their own policies or authentication constraints.
+
+### Extension ecosystem and public API direction
+
+DVA should support an extension ecosystem inspired by tools such as Obsidian, adapted to DVA's panel-first workspace. The goal is not merely to add optional buttons: extensions should be able to contribute useful capabilities and new ways to work with workspace content.
+
+The intended extension model should allow, where relevant:
+
+- **Panels and views:** add a new tool panel or an alternate view over existing content without replacing the underlying source of truth.
+- **Commands and actions:** register discoverable actions that can be reached through DVA's command discovery and appropriate menus or context actions.
+- **Content integrations:** add import/export handlers, supported content types, renderers, or converters.
+- **Workspace-aware tools:** read or update workspace content through documented APIs, with clear ownership and explicit user-visible effects.
+- **Shared capabilities:** expose narrowly scoped services that other extensions can use, so tools can compose instead of becoming isolated mini-apps.
+- **Independent lifecycle:** install, enable, disable, update, configure, and remove extensions independently where the packaging model permits.
+
+The File Finder and Sketch to Text are candidate proving grounds. The File Finder should be able to provide file search/navigation and send selected content into a panel through supported interfaces. Sketch to Text should be able to present a drawing surface and insert or export its text representation without needing privileged access to the entire workspace. They may ship bundled with DVA initially, but should exercise the same extension-facing contracts intended for third-party developers.
+
+The core should own foundational responsibilities such as workspace state, panel layout, persistence, extension lifecycle, permissions, and stable API contracts. Specialized features should live in replaceable modules when that separation is practical. Avoid both extremes: making every tiny behavior an extension adds needless complexity, while embedding every tool directly in the core prevents the ecosystem from growing independently.
+
+The API must state its supported capabilities and compatibility version. Extensions should declare the permissions and capabilities they need, and DVA should grant only the access required. A trusted-looking extension must not receive unrestricted filesystem, network, credential, or native-command access by default. Untrusted or incompatible extensions should fail safely and explain the problem clearly.
+
+Do not assume every extension is a JavaScript plugin. Some integrations may be embedded web views, external processes, native applications, or remote services, each with different isolation, lifecycle, and security constraints. DVA should expose a coherent integration model without pretending these runtimes are interchangeable. Prioritize a small, documented API and validate it against DVA's own tools before promising broad third-party compatibility.
+
+This is an architectural goal, not an implemented extension system. The exact API, packaging and distribution format, extension discovery/registry, signing or trust model, sandboxing, compatibility policy, and support for native or external-process extensions remain open decisions.
 
 This is a long-term architectural goal, not a requirement to ship universal app hosting in the first prototype. Start with the panel abstraction and a small number of controlled module types, then validate the interface with our own apps before expanding compatibility.
 
