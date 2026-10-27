@@ -1,13 +1,36 @@
 # DVA: Design Document
 
-**Version:** 0.8.0  
+**Version:** 0.9.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.7.0  
+**Previous version:** 0.8.0  
 **Motto:** Evidence over speculation.
 
-## Version 0.8.0: Change Summary
+## Version 0.9.0: Change Summary
 
-This update defines the first concrete workspace JSON schema and records the implementation boundary for native persistence and guarded migration. Code is now present for the first schema and save/load path, but automated CI and real desktop restart acceptance must still verify it before it can be called working.
+This update records the agreed direction for compact, clearly named file operations; pointer-directed panel placement and preview; movable panels after splitting; external-file drag-and-drop into the workspace or Files panel; and vertical-only workspace scrolling. These are design decisions, not claims that the behaviors have been implemented or tested.
+
+### File operations and naming
+
+- The File menu is the central, discoverable place for workspace and file operations. It should contain the full set of file operations for now without adding permanent toolbar buttons for every action.
+- Use clear, consistent names across menus, panels, and context menus. The File menu is the canonical place to discover operations; right-click menus expose relevant contextual actions as an additional route.
+- Working labels: **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. These distinguish the workspace JSON from ordinary text files. Exact wording may be refined while preserving that distinction.
+- The in-app **Files** panel is the ordinary folder explorer for browsing and opening text files and other supported file types.
+- Do not add keyboard shortcuts for the newly discussed File menu operations as part of this design pass. The scope of this preference relative to existing prototype shortcuts remains to be reconciled explicitly; this update does not silently remove previously documented shortcut behavior.
+
+### Panel placement and drag-and-drop
+
+- Panels are movable and resizable. Splitting creates another panel but does not permanently lock the new panel into that split.
+- The user's drag/drop location determines placement intent. The live preview shows the resulting layout before the drop is committed, including panels that will slide or resize to make room.
+- Dropping onto a pane's tab area opens the item as a tab there; dropping at an edge previews a split in that direction; dropping into available workspace space, including below existing panels, previews a new panel there.
+- When space is constrained, the placement may use a tab, rearrange existing panels, or place the new panel in the next available space. The pointer location and visible preview, not an opaque placement choice, communicate the result.
+- Dropping an external file into the workspace opens it in a new panel or tab according to the preview, without unexpectedly replacing existing content.
+- Dropping a file onto the Files panel is a file-management interaction, distinct from dropping it into the writing workspace. Exact copy/move semantics for file-management drops remain open.
+- The intended future drop targets include ordinary text files, images, PDFs, and additional supported files or content from other applications. Support depends on the relevant file type, integration, and security constraints; this is not a claim that all types are currently supported.
+
+### Scrolling and width
+
+- The workspace layout must not require horizontal scrolling. Panels adapt, resize, or rearrange to available width; horizontal splits remain allowed.
+- Workspace-level overflow is vertical only. Content-specific navigation such as zooming or panning an image is separate from horizontal scrolling the workspace layout.
 
 ### Workspace persistence decision
 
@@ -360,12 +383,17 @@ Examples include search, settings, file exploration, save history, comparison, a
 - Keep source and destination files accessible side by side while the user works between them.
 - Opening an item from the file finder should not unexpectedly replace the current item or destroy the working arrangement. Prefer opening alongside the current item, or let the user choose the destination pane.
 - Remember the arrangement so the user can return to the same set of files and panes later.
+- Panels can be moved and resized independently after creation. A split creates a new panel but does not permanently bind that panel to the split position.
+- For drag-and-drop placement, the pointer's target determines the intended result and a live preview shows the actual resulting layout before release. A tab-area drop creates a tab in that pane; an edge drop previews a split in that direction; a drop into available space, including beneath existing panels, previews a new panel there.
+- If space is constrained, DVA may make room by resizing or moving other panels, use a tab where the pointer indicates, or place the panel in the next available space. The preview must make the consequence visible before committing.
 
 The goal is to reduce tab juggling and repeated split-panel setup. The user should not need to reconstruct the workspace every time they move information between files.
 
 Session restoration preserves panes, tabs, active tabs, cursor and scroll positions, and window positions where supported.
 
-Exact split defaults and edge cases remain subject to refinement.
+Horizontal splits are allowed, but the workspace layout must not require horizontal scrolling. Workspace-level overflow is vertical only. Panels and their content adapt to the available width; content-specific image zooming or panning is distinct from workspace scrolling.
+
+Exact implementation details and edge cases remain subject to refinement.
 
 ## 10. Panel Content and Navigation
 
@@ -384,9 +412,10 @@ Examples include:
 - Each panel manages its own content navigation, including scroll position, current page, zoom, and selection where applicable.
 - Content should not become inaccessible merely because it exceeds the panel's visible dimensions.
 - Panels should not force the entire workspace to scroll when the intended behavior is for the content inside an individual panel to scroll.
+- Ordinary workspace and writing navigation must not require horizontal scrolling. Workspace-level overflow is vertical only; panels must adapt to available width. Horizontal splits are allowed and do not imply a horizontal workspace scrollbar.
 - A panel may offer both continuous scrolling and page-by-page navigation when the content type supports both.
 - Navigation state should be preserved when switching tabs or restoring the workspace, where meaningful and technically supported.
-- Panels remain resizable and rearrangeable. Their content should adapt to available space without losing its underlying identity or relationships.
+- Panels remain resizable, movable, and rearrangeable after creation or splitting. Their content should adapt to available space without losing its underlying identity or relationships.
 - Content-specific interactions should be provided where useful, rather than assuming every panel is only an editable text area.
 
 This is a general workspace capability, not a requirement that every panel implement every interaction. The content type determines which behaviors make sense.
@@ -748,6 +777,10 @@ These are plain-named views that may overlap in purpose.
 
 **Files:** An in-app folder explorer. Multiple folder panes may remain open. Drag-and-drop supports movement between panes. The file browser itself is an ordinary panel, not a special navigation layer that hides the real file structure. Users should be able to open files and supported metadata/configuration files as panels, and edit them in place when appropriate.
 
+**File menu and contextual actions:** The File menu is the central place to discover workspace and file operations. For now, it contains the complete set of these operations without requiring permanent buttons for each one. Use clear, consistent names across the File menu, Files panel, and right-click menus. Right-click menus expose relevant contextual actions but do not replace the File menu. Working labels are **Open Workspace…**, **Save Workspace**, **Save Workspace As…**, **Open File…**, and **Show Workspace Location**. These labels distinguish loading/saving the whole workspace JSON from opening an ordinary file. Do not add keyboard shortcuts for these newly discussed File menu operations during this design pass; reconcile their scope against existing prototype shortcuts explicitly rather than silently changing existing behavior.
+
+**External drag-and-drop:** Dropping a supported external file into the workspace opens it in a new panel or tab according to the visible placement preview, without unexpectedly replacing existing content. Intended future file types include text files, images, PDFs, and other supported files or content from external applications. A drop onto the Files panel is a file-management interaction rather than an instruction to open the item in the workspace; exact copy/move behavior remains open. Actual support depends on file type, integration, and security constraints.
+
 **Inspectable Workspace and App Data:** The workspace structure should be visible from within DVA. Users can open the workspace JSON, app/module configuration JSON, indexes, and relevant metadata as panels alongside the content they describe. Where a file or data object is editable, users should be able to edit it directly and see the effects reflected in the workspace, subject to validation and clear error handling. A readable property editor and a raw JSON/text view may both be offered over the same underlying data; they must not become competing sources of truth.
 
 **Drag-to-Append:** Select text in an open document and drag that selection onto a file in the file finder. Dropping onto a file appends the selected text to the end of the destination by default. The destination does not need to be opened first, and the source document remains available. This supports sorting rough notes into established files without tab juggling or manual copy-and-paste.
@@ -1107,15 +1140,16 @@ These are design goals, not a claim that each has been implemented or verified.
 
 ### Layout and navigation
 
-- Whether a new split initially duplicates the current tab or opens a new item.
-- Exact split behavior and tab movement.
+- Exact split and tab interaction details beyond the established pointer-directed placement preview.
+- How a placement preview should resolve edge cases when the workspace is crowded or has no obvious free area.
 - Default behavior when opening an item from the file finder while another item is active.
-- The simplest clear move-versus-copy behavior for drag-to-append, including undo.
+- Copy/move semantics and undo for dropping files into the Files panel; separately, the established drag-to-append text operation still needs clear move-versus-copy behavior and undo.
 - Mark Index Pane grouping, filters, sorting, and navigation behavior.
 - How cross-workspace content is opened and referenced.
 - Folder explorer operations.
 - Search result presentation and filtering.
 - How transient related panels appear and disappear.
+- Whether the no-shortcut preference for newly discussed File menu operations also supersedes existing prototype shortcuts such as Ctrl/Cmd+S; do not infer a global shortcut removal without an explicit decision.
 
 ### Save history
 
@@ -1144,11 +1178,14 @@ These questions remain open intentionally. Decisions follow discussion, prototyp
 |---|---|
 | Workspace | The container for working state and content, represented by JSON |
 | Window | Operating-system window containing panes |
-| Pane | Split region containing tabs |
+| Pane | Split region containing tabs; can be moved and resized within the workspace |
 | Tab | View of an item with its own navigation state |
 | Open item | Content or view opened in a tab |
 | Embedded content | Writing stored directly inside workspace JSON by default |
-| File | Text stored separately on disk |
+| File | Content stored separately on disk, such as a text file, image, or PDF |
+| Workspace File | JSON file that stores the DVA workspace and its working state |
+| Files | In-app folder explorer panel |
+| File menu | Central menu for discovering workspace and file operations |
 | View | A presentation or tool operating on content |
 | Mark | A position-anchored structure in text |
 | Command | A mark that triggers an action |
