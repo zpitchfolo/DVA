@@ -84,7 +84,7 @@ export default function App() {
       if (key === "n") {
         event.preventDefault();
         createPanel();
-      } else if (key === "p") {
+      } else if (key === "f") {
         event.preventDefault();
         setSearchOpen(true);
         setSearchQuery("");
@@ -140,7 +140,7 @@ export default function App() {
       </section>
       <footer className="hint-layer" aria-label="Keyboard hints">
         <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>N</kbd> New panel</span>
-        <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>P</kbd> Find anything</span>
+        <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>F</kbd> Find anything</span>
         <span><kbd>Ctrl</kbd> <span className="hint-plus">+</span> <kbd>S</kbd> Save</span>
         <span className="hint-note">{saveStatus === "Save failed" ? "Could not save locally. Check app storage." : "A workspace that follows the work."}</span>
       </footer>
