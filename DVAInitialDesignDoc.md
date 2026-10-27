@@ -1,13 +1,45 @@
 # DVA: Design Document
 
-**Version:** 0.6.9  
+**Version:** 0.7.0  
 **Status:** Provisional. Working design model, not an implementation specification.  
-**Previous version:** 0.6.8  
+**Previous version:** 0.6.9  
 **Motto:** Evidence over speculation.
+
+## Version 0.7.0: Change Summary
+
+This update records the agreed persistence destination model, the Ctrl/Cmd+F search shortcut, and the maintenance/handoff process. It does not implement these runtime changes.
+
+### Workspace persistence decision
+
+- The workspace's canonical working state is a JSON file, including embedded writing and panel/workspace state.
+- The default location should be DVA's dedicated, writable app-data location, not the installation directory by assumption. This supports installed builds where the app's install directory may not be writable.
+- Portable builds may use a dedicated `app-data` directory beside the executable when the distribution explicitly configures that writable location. Do not point the data override at the executable directory itself or a broad user folder.
+- Users should be able to choose another workspace location. The architecture should allow opening/saving a workspace elsewhere without making that a prerequisite for writing.
+- The existing localStorage workspace must be migrated into JSON without silently discarding content. Migration should preserve the old data until the new JSON has been written and verified.
+- This is the agreed target architecture, not evidence that native JSON persistence, location selection, or migration has been implemented.
+
+Tauri supports app-specific data directories and explicit directory overrides, including portable-build layouts. The implementation must account for platform-specific writability and use least-privilege filesystem access: [Tauri configuration reference](https://v2.tauri.app/reference/config/) and [Tauri filesystem plugin](https://v2.tauri.app/plugin/file-system/).
+
+### Keyboard and save behavior
+
+- The agreed search/find shortcut is Ctrl/Cmd+F. Ctrl/Cmd+P is not the intended shortcut.
+- The current prototype still uses Ctrl/Cmd+P, so implementation and the visible keyboard hint remain out of sync with the agreed design until changed and tested.
+- Ctrl/Cmd+S must produce an observable result. It should flush pending workspace writes and communicate success or failure, rather than appearing inert when autosave has already run.
+- Search scope for the current prototype is panel titles and panel content. Broader file/workspace search is future behavior, not implied by this shortcut change.
+
+### Existing implementation boundary
+
+The current prototype stores panel content and active-panel state in WebView localStorage under `dva.workspace.v1`. The user reports that content survives closing and reopening the app. That is useful manual evidence, but it does not change the architecture decision: localStorage remains a temporary implementation, not the canonical JSON workspace. Automated tests, production build, and the native JSON migration have not been independently verified by this documentation update.
+
+### Maintenance and recovery
+
+- Keep one canonical current design document and one current test record; use Git history for older versions.
+- Maintain a separate [DVA Maintenance Guide](DVA-Maintenance.md) as the handoff and recovery checklist.
+- The maintenance guide must preserve the last known baseline, exact outstanding work, test gates, and recovery rules so a new session can resume without re-deriving decisions.
 
 ## Version 0.6.9: Change Summary
 
-This patch establishes the first persistence and keyboard-shortcut slice in the running prototype. The frontend now autosaves panel content and active-panel state to local storage, offers an explicit Save action and Ctrl/Cmd+S, creates panels with Ctrl/Cmd+N, and opens panel search with Ctrl/Cmd+P. These are implementation changes, not yet verified by an executed test run or restart acceptance check.
+This patch establishes the first persistence and keyboard-shortcut slice in the running prototype. The frontend now autosaves panel content and active-panel state to local storage, offers an explicit Save action and Ctrl/Cmd+S, creates panels with Ctrl/Cmd+N, and currently opens panel search with Ctrl/Cmd+P. The agreed target shortcut is Ctrl/Cmd+F; the mismatch remains outstanding. These are implementation changes, not yet verified by an executed test run or restart acceptance check.
 
 ### Added in this version
 
