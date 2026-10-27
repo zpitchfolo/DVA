@@ -7,6 +7,11 @@ beforeEach(() => {
 });
 
 describe("DVA workspace shell", () => {
+  it("shows a visible version label", () => {
+    render(<App />);
+    expect(screen.getByLabelText(/app version/i)).toHaveTextContent("0.2.0");
+  });
+
   it("starts with an editable panel", () => {
     render(<App />);
     expect(screen.getByRole("textbox", { name: "Untitled content" })).toBeInTheDocument();
