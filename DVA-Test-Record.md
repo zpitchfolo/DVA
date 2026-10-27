@@ -1,8 +1,20 @@
 # DVA Test Record
 
-**Document version:** 0.5.0  
-**Current status:** Frontend tests, production build, and npm audit passed in GitHub Actions for commit `18840cc589d560c2e03edf30e44d82db0833b95c`. Vitest and its `@vitest/*` family are updated to 4.1.12, resolving the two previously reported moderate findings. Desktop runtime, real close/reopen persistence, and native JSON persistence remain unverified by CI. User reports that content survives closing and reopening.  
+**Document version:** 0.6.0  
+**Current status:** New candidate adds native versioned workspace JSON, guarded localStorage migration, recovery UI, regression tests, and a Rust schema-validation test suite. Frontend runs #24 and #25 passed for the relevant source commits; native Rust CI was added in run #26 and is pending at the time this record is written. Desktop runtime and real close/reopen persistence remain unverified. Do not mark application acceptance complete until the native job and desktop runtime gate are checked.  
 **Accepted application baseline:** The earlier frontend-only run belongs to the old `zpitchfolo/DVAexe` repository and does not establish acceptance of the current `zpitchfolo/DVA` source.
+
+## Current candidate
+
+| New persistence slice | Current source status |
+|---|---|
+| Native JSON | Rust commands load and save `workspace.json` under Tauri's app-data directory |
+| JSON shape | `schemaVersion: 1`, `panels[]` with `id/title/content`, and `activePanelId`; see design doc v0.8.0 |
+| Migration | Only when JSON is missing; validates localStorage data, writes and verifies JSON, retains original localStorage |
+| Recovery | Malformed/invalid saved data pauses initialization and autosave instead of silently replacing it |
+| Write strategy | Temporary file + flush/readback validation + prior-file `.bak` copy before replacement |
+| Native schema tests | Added Rust unit tests; see the new native CI job |
+| Desktop acceptance | **NOT RUN** in this environment | 
 
 ## Current candidate
 
@@ -18,7 +30,13 @@
 | Save/restart acceptance | User reports content survives close/reopen; not independently verified in this environment |
 | Dependency audit warning | `npm ci` reported 2 moderate-severity vulnerabilities; no audit remediation was attempted in this run |\n| Overall result | **FRONTEND CI PASS. APP ACCEPTANCE STILL PENDING.** |
 
-## Latest executed run
+## Latest verified source checks
+
+- Frontend run #24: [tests for guarded recovery](https://github.com/zpitchfolo/DVA/actions/runs/40446583175), passed on commit `053aba3042e80161ef72e63a67899e536d670f30`.
+- Frontend run #25: [design schema documentation](https://github.com/zpitchfolo/DVA/actions/runs/40446600224), passed on commit `2cf62f5de4d3fcc76a956e3a99ca5fe5fb1a1cee`.
+- Native Rust CI was added in [run #26](https://github.com/zpitchfolo/DVA/actions/runs/40446618518) for commit `eef50ffcd7eb09e4d94fbfa3cb0969083bdb4e77`; its final status must be checked before acceptance.
+
+## Earlier dependency baseline
 
 - Workflow: [DVA frontend checks, run #18](https://github.com/zpitchfolo/DVA/actions/runs/40445179309)
 - Tested commit: `18840cc589d560c2e03edf30e44d82db0833b95c`
@@ -29,7 +47,7 @@
 - `npm run build`: PASS; TypeScript check and Vite production build succeeded.
 - This was a hosted frontend CI run, not a local run in the user’s Windows environment. It did not launch the Tauri desktop app or test native filesystem persistence.
 
-## Test coverage added
+## Current test coverage
 
 - Initial editable panel renders.
 - Creating a panel preserves the first panel.
@@ -38,7 +56,10 @@
 - Editing and creating panels persists and restores after remount.
 - Ctrl/Cmd+N creates a panel.
 - Ctrl/Cmd+F opens search and selecting a result focuses the matching panel.
-- Ctrl/Cmd+S writes the current workspace snapshot and reports local-save status.
+- Ctrl/Cmd+S writes the current workspace snapshot and reports save status.
+- Malformed localStorage is preserved and triggers recovery UI without autosaving over the source.
+- Structurally invalid localStorage is preserved and does not become a starter workspace.
+- Rust schema round-trip, unsupported schema version, duplicate panel ID, invalid active-panel ID, and empty-workspace validation tests are included in the new native CI job.
 
 ## Required next verification
 
@@ -52,9 +73,9 @@
 
 ## Known gaps and stop conditions
 
-- The current persistence implementation uses WebView local storage. The user reports that it survives closing and reopening, but it is still not the intended user-inspectable workspace JSON file or native filesystem save flow.
-- User-chosen workspace paths, native JSON persistence, safe localStorage-to-JSON migration, import/export, schema migrations, history snapshots, and recovery are not implemented by this change.
-- Browser/WebView storage can fail or be cleared. The UI reports a local save failure, but stronger recovery and storage-integrity behavior remains future work.
+- Native JSON persistence and guarded localStorage migration are now implemented in source, but must not be described as accepted until native CI and desktop runtime verification pass.
+- User-chosen workspace paths, import/export, schema migrations beyond version 1, history snapshots, and a dedicated recovery/restore UI for malformed native JSON remain unimplemented.
+- Browser/WebView storage can fail or be cleared. The source now pauses autosave when stored data cannot be validated, but native write-failure and backup-restore behavior still require execution evidence.
 - A successful frontend test run alone does not prove that persistence survives a real desktop app restart. That must be checked separately.
 - Do not mark this candidate accepted until the automated checks pass and the desktop persistence flow is verified.
 
