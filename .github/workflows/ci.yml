@@ -32,3 +32,21 @@ jobs:
         run: npm test
       - name: Type-check and build
         run: npm run build
+
+  native-workspace:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install Tauri Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev
+      - name: Set up stable Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Cargo dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri -> target
+      - name: Run native workspace schema tests
+        run: cargo test --manifest-path app/src-tauri/Cargo.toml
