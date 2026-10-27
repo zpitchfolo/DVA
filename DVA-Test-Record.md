@@ -1,7 +1,7 @@
 # DVA Test Record
 
-**Document version:** 0.3.0  
-**Current status:** Candidate implementation committed; automated tests and build have not been executed here. User reports workspace content survives closing and reopening the app; this is user-reported manual evidence, not an independently repeated check.  
+**Document version:** 0.4.0  
+**Current status:** Frontend automated tests and production build passed in GitHub Actions for commit `87db1615d06f85139519b04ecf71425b458102e0`. Desktop runtime, real close/reopen persistence, and native JSON persistence remain unverified by CI. User reports that content survives closing and reopening.  
 **Accepted application baseline:** The earlier frontend-only run belongs to the old `zpitchfolo/DVAexe` repository and does not establish acceptance of the current `zpitchfolo/DVA` source.
 
 ## Current candidate
@@ -9,16 +9,16 @@
 | Field | Result |
 |---|---|
 | Repository | [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA) |
-| Candidate implementation commit | `f7578d65893ba92430261dee11f623934f7b90ac` |
+| Tested source commit | `87db1615d06f85139519b04ecf71425b458102e0` (docs-only commits after the implementation candidate; app source unchanged) |
 | Changes included | Local-storage autosave/restore, explicit Save, Ctrl/Cmd+S, Ctrl/Cmd+N, Ctrl/Cmd+P panel search, regression tests |
-| Automated tests | **NOT RUN** in this environment |
-| Type check and production build | **NOT RUN** in this environment |
-| CI | Workflow added for dependency installation, tests, and production build; run result not yet observed |
+| Automated tests | **PASS**: 1 test file, 8 tests passed in GitHub Actions |
+| Type check and production build | **PASS**: `npm run build` completed (`tsc --noEmit && vite build`) |
+| CI | **PASS**: [GitHub Actions run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029), Ubuntu 24.04, Node 22.23.3, npm 10.9.9; `npm ci`, `npm test`, and `npm run build` all succeeded |
 | Desktop launch | User reports the current app launches and panel splitting works; this is user-reported evidence, not an independent runtime check of this candidate |
 | Save/restart acceptance | User reports content survives close/reopen; not independently verified in this environment |
-| Overall result | **CANDIDATE ONLY. NOT YET ACCEPTED.** |
+| Dependency audit warning | `npm ci` reported 2 moderate-severity vulnerabilities; no audit remediation was attempted in this run |\n| Overall result | **FRONTEND CI PASS. APP ACCEPTANCE STILL PENDING.** |
 
-## Test coverage added
+## Latest executed run\n\n- Workflow: [DVA frontend checks, run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029)\n- Tested commit: `87db1615d06f85139519b04ecf71425b458102e0`\n- Environment: Ubuntu 24.04.5 LTS; Node.js 22.23.3; npm 10.9.9; Vitest 4.1.11.\n- `npm ci`: PASS; installed 118 packages, audited 119; reported 2 moderate vulnerabilities.\n- `npm test`: PASS; 1 test file, 8 tests passed.\n- `npm run build`: PASS; TypeScript check and Vite production build succeeded.\n- This was a hosted frontend CI run, not a local run in the user’s Windows environment. It did not launch the Tauri desktop app or test native filesystem persistence.\n\n## Test coverage added
 
 - Initial editable panel renders.
 - Creating a panel preserves the first panel.
