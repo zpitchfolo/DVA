@@ -1,6 +1,6 @@
 # DVA Maintenance Guide
 
-**Document version:** 0.1.3  
+**Document version:** 0.1.4  
 **Status:** Active handoff and recovery guide  
 **Repository:** [zpitchfolo/DVA](https://github.com/zpitchfolo/DVA)
 
@@ -66,7 +66,7 @@ The current candidate is **canonical JSON persistence with guarded migration**. 
 
 - Inspect the current branch, working tree, latest commit, relevant source, tests, and CI workflow.
 - Read the latest design document, this guide, and the test record.
-- CI now runs frontend checks plus `cargo test --manifest-path app/src-tauri/Cargo.toml` on Ubuntu with Tauri's Linux build dependencies. Confirm the run's final result before accepting the source.
+- CI now runs frontend checks plus `cargo test --manifest-path src-tauri/Cargo.toml` on Ubuntu with Tauri's Linux build dependencies. Confirm the run's final result before accepting the source.
 - The connected GitHub workflow is the available test executor here; the assistant has not launched the Windows desktop runtime. Record exact CI run links and keep desktop acceptance pending.
 - Keep the current user data and last known good commit recoverable before implementation.
 

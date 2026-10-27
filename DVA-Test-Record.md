@@ -1,6 +1,6 @@
 # DVA Test Record
 
-**Document version:** 0.6.0  
+**Document version:** 0.6.1  
 **Current status:** New candidate adds native versioned workspace JSON, guarded localStorage migration, recovery UI, regression tests, and a Rust schema-validation test suite. Frontend runs #24 and #25 passed for the relevant source commits; native Rust CI was added in run #26 and is pending at the time this record is written. Desktop runtime and real close/reopen persistence remain unverified. Do not mark application acceptance complete until the native job and desktop runtime gate are checked.  
 **Accepted application baseline:** The earlier frontend-only run belongs to the old `zpitchfolo/DVAexe` repository and does not establish acceptance of the current `zpitchfolo/DVA` source.
 
@@ -28,13 +28,14 @@
 | CI | **PASS**: [GitHub Actions run #5](https://github.com/zpitchfolo/DVA/actions/runs/40443935029), Ubuntu 24.04, Node 22.23.3, npm 10.9.9; `npm ci`, `npm test`, and `npm run build` all succeeded |
 | Desktop launch | User reports the current app launches and panel splitting works; this is user-reported evidence, not an independent runtime check of this candidate |
 | Save/restart acceptance | User reports content survives close/reopen; not independently verified in this environment |
-| Dependency audit warning | `npm ci` reported 2 moderate-severity vulnerabilities; no audit remediation was attempted in this run |\n| Overall result | **FRONTEND CI PASS. APP ACCEPTANCE STILL PENDING.** |
+| Dependency audit warning | `npm ci` reported 2 moderate-severity vulnerabilities; no audit remediation was attempted in this run |
+| Overall result | **FRONTEND CI PASS. APP ACCEPTANCE STILL PENDING.** |
 
 ## Latest verified source checks
 
 - Frontend run #24: [tests for guarded recovery](https://github.com/zpitchfolo/DVA/actions/runs/40446583175), passed on commit `053aba3042e80161ef72e63a67899e536d670f30`.
 - Frontend run #25: [design schema documentation](https://github.com/zpitchfolo/DVA/actions/runs/40446600224), passed on commit `2cf62f5de4d3fcc76a956e3a99ca5fe5fb1a1cee`.
-- Native Rust CI was added in [run #26](https://github.com/zpitchfolo/DVA/actions/runs/40446618518) for commit `eef50ffcd7eb09e4d94fbfa3cb0969083bdb4e77`; its final status must be checked before acceptance.
+- Native CI run [#26](https://github.com/zpitchfolo/DVA/actions/runs/40446618518) failed because the workflow used a manifest path inconsistent with its `app/` working directory. The workflow command was corrected in commit `f797fbbe9d8ed885ffa2c6bf1cb9f4e709042740`; replacement run [#29](https://github.com/zpitchfolo/DVA/actions/runs/40446714626) has passed the frontend job, while its native job is still installing Linux dependencies at the time of this record. The native Rust test result is not yet known.
 
 ## Earlier dependency baseline
 
